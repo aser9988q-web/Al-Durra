@@ -139,22 +139,22 @@ if (isset($_GET['type'])) {
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/fel3.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/fel4.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/fel5.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/fel6.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/24dde8_0db91c8fda04473fb47226437e5c4f92~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
@@ -166,27 +166,27 @@ if (isset($_GET['type'])) {
 
         <?php if ($type == 3): ?>
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ban1.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ban2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/24dde8_d002ef03446a473599920c653bf27a83~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ban3.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ban4.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ban5.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
@@ -203,22 +203,22 @@ if (isset($_GET['type'])) {
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ser2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/24dde8_d002ef03446a473599920c653bf27a83~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ser3.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ser4.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ser5.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
         <?php endif; ?>
@@ -235,17 +235,17 @@ if (isset($_GET['type'])) {
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ind3.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ind4.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
 
             <div class="px-4 my-5 text-center">
-                <img src="./assets/ind5.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
         <?php endif; ?>
@@ -260,15 +260,15 @@ if (isset($_GET['type'])) {
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
             <div class="px-4 my-5 text-center">
-                <img src="./assets/pak3.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
             <div class="px-4 my-5 text-center">
-                <img src="./assets/pak4.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
             <div class="px-4 my-5 text-center">
-                <img src="./assets/pak5.avif" class="img-fluid" style="border-radius: 5px;" alt="">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" style="border-radius: 5px;" alt="">
                 <a href="./appointment.php" class="w-50 btn btn-primary py-2 mt-4" style="border-radius: 20px;">احجز الأن</a>
             </div>
         <?php endif; ?>

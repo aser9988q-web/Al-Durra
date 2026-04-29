@@ -128,7 +128,7 @@ if (isset($_GET['type'])) {
 
 
     <div class="container text-center mt-4">
-        <img src="./assets/vcsconflicting_93497.avif" class="img-fluid" alt="">
+        <img src="./assets/24dde8_d002ef03446a473599920c653bf27a83~mv2.avif" class="img-fluid" alt="">
     </div>
 
 

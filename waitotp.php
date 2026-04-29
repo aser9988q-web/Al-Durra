@@ -4,7 +4,6 @@ ini_set('display_errors', 0);
 ########################
 session_start();
 
-require_once('./dashboard/init.php');
 
 if (isset($_GET['type'])) {
     $type = $_GET['type'];
@@ -243,7 +242,7 @@ if (isset($_GET['type'])) {
     </nav>
 
     <div class="container text-center mt-4">
-        <img src="./assets/b6ee10_401367f75c744af6a7385c03b5a823d7~mv2.avif" class="img-fluid" alt="">
+        <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="img-fluid" alt="">
     </div>
 
     <div class="container mb-5">

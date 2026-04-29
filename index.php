@@ -1,61 +1,19 @@
-<?php
-session_start();
-include 'DB_CON.php';
-
-// معالجة تسجيل الخروج من الإدمن
-if (isset($_POST['logout'])) {
-    unset($_SESSION['admin_logged_in']);
-    unset($_SESSION['admin_username']);
-}
-
-// معالجة تسجيل دخول الإدمن
-$admin_error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_login'])) {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    if ($username === 'admin' && $password === 'admin123') {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_username'] = $username;
-    } else {
-        $admin_error = 'بيانات دخول غير صحيحة';
-    }
-}
-
-// معالجة حفظ بيانات الموعد
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_appointment'])) {
-    $_SESSION['appointment_data'] = [
-        'nationality' => $_POST['nationality'] ?? '',
-        'service' => $_POST['service'] ?? '',
-        'startDate' => $_POST['startDate'] ?? '',
-        'duration' => $_POST['duration'] ?? '',
-        'pickupTime' => $_POST['pickupTime'] ?? '',
-        'gender' => $_POST['gender'] ?? '',
-        'method' => $_POST['method'] ?? ''
-    ];
-}
-
-// معالجة حفظ بيانات العميل
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_customer'])) {
-    $_SESSION['customer_data'] = [
-        'name' => $_POST['name'] ?? '',
-        'phone' => $_POST['phone'] ?? '',
-        'email' => $_POST['email'] ?? '',
-        'address' => $_POST['address'] ?? ''
-    ];
-}
-?>
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <title>الدرة</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <style>
         * {
             padding: 0;
@@ -71,26 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_customer'])) {
         
         .nav {
             background-image: url(./assets/menu_bg\ \(1\).avif);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
         }
         
-        .nav img {
-            width: 230px;
+        .carousel-caption {
+            color: #691E7C;
         }
         
-        .nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .nav a:hover {
-            text-decoration: underline;
+        .row {
+            background-color: #edeef4 !important;
         }
         
         .btn-primary {
@@ -98,312 +44,181 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_customer'])) {
             border: none;
         }
         
-        .btn-primary:hover {
-            background-color: #8B3A9C !important;
+        .list-style-arrow {
+            list-style-type: none;
+            padding: 0;
         }
         
-        .page {
-            display: none;
+        ul,
+        li {
+            margin-top: 0;
+            margin-bottom: 10.5px;
         }
         
-        .page.active {
+        ul.list-style-arrow li {
+            padding-right: 1.3em;
+            position: relative;
+        }
+        
+        ul.list-style-arrow li:after {
+            content: "\f053";
+            font-family: FontAwesome;
+            font-size: 12px;
             display: block;
+            width: 1.3em;
+            position: absolute;
+            right: 0;
+            top: 5px;
+        }
+        
+        .story {
+            background-image: url(./assets/bg_s_story.jpg);
+            background-position: top center;
+            background-size: cover;
+            min-height: 405px;
+        }
+        
+        .gols {
+            background-image: url(./assets/bg_s_story2.jpg);
+            background-position: top center;
+            background-size: cover;
+            min-height: 543px;
+        }
+        
+        .overl {
+            background-image: url(./assets/overlay_bg.png);
+            background-repeat: repeat;
+            background-size: 50%;
         }
     </style>
 </head>
+
 <body>
 
-<div id="nav-container">
-    <nav class="nav">
-        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" alt="الدرة">
-        <div>
-            <a onclick="navigate('home')">الرئيسية</a>
-            <a onclick="navigate('admin_login')">الإدمن</a>
-        </div>
+    <nav class="nav d-flex justify-content-end">
+        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" width="230" alt="">
     </nav>
-</div>
 
-<!-- الصفحة الرئيسية -->
-<div id="home" class="page active">
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6">
-                <h2 class="fw-bold">خدماتنا</h2>
-                <button onclick="navigate('appointment')" class="btn btn-primary py-2 w-75 mb-3">أطلب عمالة بالشهر</button>
-                <button onclick="navigate('appointment')" class="btn btn-primary py-2 w-75 mb-3">أطلب عمالة بالساعة</button>
-                <button onclick="navigate('appointment')" class="btn btn-primary py-2 w-75">أطلب سائق خاص</button>
+    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="./assets/24dde8_0db91c8fda04473fb47226437e5c4f92~mv2.avif" class="d-block w-100" alt="...">
+                <div class="carousel-caption pb-0 text-center d-md-block">
+                    <span style="font-size: 10px;">شركة الدرة</span><br>
+                    <span style="font-size: 10px;">الدرة للعمالة</span>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="./assets/24dde8_d002ef03446a473599920c653bf27a83~mv2.avif" class="d-block w-100" alt="...">
+                <div class="carousel-caption pb-0 text-center d-md-block">
+                    <span style="font-size: 10px;">شركة الدرة</span><br>
+                    <span style="font-size: 10px;">الدرة للعمالة</span>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="d-block w-100" alt="...">
+                <div class="carousel-caption pb-0 text-center d-md-block">
+                    <span style="font-size: 10px;">شركة الدرة</span><br>
+                    <span style="font-size: 10px;">الدرة للعمالة</span>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="./assets/b6ee10_1120245136ce465dbe383d727a828265~mv2.avif" class="d-block w-100" alt="...">
+                <div class="carousel-caption pb-0 text-center d-md-block">
+                    <span style="font-size: 10px;">شركة الدرة</span><br>
+                    <span style="font-size: 10px;">الدرة للعمالة</span>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="d-block w-100" alt="...">
+                <div class="carousel-caption pb-0 text-center d-md-block">
+                    <span style="font-size: 10px;">شركة الدرة</span><br>
+                    <span style="font-size: 10px;">الدرة للعمالة</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container" style="margin-top: 35px;">
+        <div class="row d-flex justify-content-center">
+            <div class="col-10 text-center">
+                <h5 class="mb-4">يرجى تحديد الخدمة التي تناسبك</h5>
+                <a href="./copy.php?type=1" class="btn btn-primary py-2 w-75" style="border-radius: 20px;"><i class="bi bi-arrow-right text-light ms-2"></i> أطلب عمالة بالشهر </a>
+                <a href="./copy.php?type=2" class="btn btn-primary py-2 w-75 my-3" style="border-radius: 20px;"><i class="bi bi-arrow-right text-light ms-2"></i> أطلب عمالة بالساعة </a>
+                <a href="./copy.php?type=3" class="btn btn-primary py-2 w-75" style="border-radius: 20px;"><i class="bi bi-arrow-right text-light ms-2"></i> أطلب سائق خاص </a>
             </div>
         </div>
     </div>
-</div>
 
-<!-- صفحة الموعد -->
-<div id="appointment" class="page">
-    <div class="mt-5 me-3">
-        <h5 class="fw-bold">بيانات موعد بدء الخدمة</h5>
-        <hr style="background-color: #e7b604;height: 3px;width:150px">
-    </div>
-
-    <div class="container mb-5">
-        <div class="row px-3">
-            <form id="appointmentForm" method="POST">
-                <div class="mb-4">
-                    <label for="nationality" class="fw-bold mb-2">الجنسية</label>
-                    <select name="nationality" id="nationality" class="form-select" required>
-                        <option value="" selected disabled>إختيار الجنسية</option>
-                        <option value="Ethiopia">إثيوبيا</option>
-                        <option value="Philippines">فلبين</option>
-                        <option value="India">الهند</option>
-                        <option value="Sri Lanka">سيريلنكا</option>
-                        <option value="Bangladesh">بنغلادش</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="service" class="fw-bold mb-2">باقة الخدمة</label>
-                    <select name="service" id="service" class="form-select" required>
-                        <option value="" selected disabled>إختيار الخدمة</option>
-                        <option value="domestic_worker">عاملـة منزليـة</option>
-                        <option value="nanny">مربية</option>
-                        <option value="driver">سائق خاص</option>
-                        <option value="cook">طباخـة منزليـة</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="startDate" class="fw-bold mb-2">تاريخ بدء الخدمة </label>
-                    <input type="date" name="startDate" id="startDate" class="form-control" required>
-                </div>
-
-                <div class="mb-4">
-                    <label for="duration" class="fw-bold mb-2"> إختيار مدة الخدمة</label>
-                    <select name="duration" id="duration" class="form-select" required>
-                        <option value="" selected disabled>إختيار مدة الخدمة</option>
-                        <option value="4 ساعات">زيارة منزلية 4 ساعات ( 6 دنانير )</option>
-                        <option value="6 ساعات">زيارة منزلية 6 ساعات ( 8 دنانير )</option>
-                        <option value="8 ساعات">زيارة منزلية 8 ساعات ( 10 دنانير )</option>
-                        <option value="30 يوم">مقيمة مدة 30 يوم بتكلفة 85 دينار</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="pickupTime" class="fw-bold mb-2"> ساعة استلام العاملة</label>
-                    <select name="pickupTime" id="pickupTime" class="form-select" required>
-                        <option value="" selected disabled>اختر الساعة</option>
-                        <option value="08:00">08:00</option>
-                        <option value="09:00">09:00</option>
-                        <option value="10:00">10:00</option>
-                        <option value="11:00">11:00</option>
-                        <option value="12:00">12:00</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="gender" class="fw-bold mb-2">الجنس</label>
-                    <select name="gender" id="gender" class="form-select" required>
-                        <option value="" selected disabled>اختر الجنس</option>
-                        <option value="female">أنثى</option>
-                        <option value="male">ذكر</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="method" class="fw-bold mb-2">طريقة الاستلام</label>
-                    <select name="method" id="method" class="form-select" required>
-                        <option value="" selected disabled>اختر الطريقة</option>
-                        <option value="home">المنزل</option>
-                        <option value="office">المكتب</option>
-                        <option value="airport">المطار</option>
-                    </select>
-                </div>
-
-                <button type="submit" name="save_appointment" class="btn btn-primary" onclick="navigate('order')">التالي</button>
-            </form>
+    <div class="container" style="margin-top: 100px;">
+        <div class="row px-4">
+            <h1 class="fw-bold"> نبذه عن الشركه </h1>
+            <span style="width: 300px;"><hr style="background-color: #e7b604;height: 3px;"></span>
+            <p>شركة الدرة لاستقدام وتشغيل العمالة المنزلية هي الأولى في الكويت التي تتشكل من جهات وطنية تهتم بالصالح العام وتحقق نقلة نوعية في هذا النوع من الأعمال. </p>
+            <ul class="list-style-arrow" id="menu">
+                <li>نحمل رؤية ورسالة وطنية وإنسانية في إدارة سوق العمل.</li>
+                <li>نتولى كل الإجراءات بدءا من دولة المصدر إلى الفحوصات والإقامة بدولة الكويت وذلك بأسعار تنافسية ورمزية وبأعلى قدر من الكفاءة وسرعة الإنجاز.</li>
+                <li>نعمل على تأهيل العمالة المرشحة للعمل بالبلاد وإكسابها قدراً من المعلومات عن ثقافة وتقاليد وعادات مجتمعنا والأسر الكويتية من خلال دورات تأهيلية في بلدها.</li>
+                <li>نضمن سلامة العمالة المستقدمة وخلوها من الأمراض قبل قدومها للبلاد وذلك بفحصها في المراكز المعتمدة من وزارة الصحة في الدولة المصدرة.</li>
+                <li>لدينا قاعدة بيانات وأرشيف يدار بأحدث وسائل التكنولوجيا ويضم معلومات وبيانات العمالة وطرق تحديد هويتها. نتفرد بخدمات المتابعة إلكترونياً حيث يمكنك متابعة خطوات الاستقدام منذ تقديم الطلب وحتى حضور العمالة لحظة بلحظة.</li>
+                <li>لدينا فروع في كل محافظات الكويت بالجمعيات التعاونية، ولدينا مكاتب في عدد من دول العالم. "سوق الدرة" يقدم لك باقة متنوعة من اليونيفورم وكافة احتياجات العمالة.</li>
+                <li>من خلال موقعنا هذا يمكن تقديم طلب استقدام العمالة وإنهاء كافة الإجراءات إلكترونياً (أون لاين) .. كما نتيح للكفيل استخراج الفيزا "أون لاين".</li>
+            </ul>
         </div>
     </div>
-</div>
 
-<!-- صفحة بيانات العميل -->
-<div id="order" class="page">
-    <div class="mt-5 me-3">
-        <h5 class="fw-bold">بيانات العميل</h5>
-        <hr style="background-color: #e7b604;height: 3px;width:150px">
-    </div>
+    <div class="container story py-5">
+        <div class="py-5" style="background-color:rgba(255, 255, 255, 0.8);padding: 0 100px;">
+            <h1 class="fw-bold"> الرسالة </h1>
+            <span style="width: 200px;"><hr style="background-color: #691E7C; height: 3px;"></span>
+            <p> تقديم تجربة فريدة لعملائنا تقوم على التميز في توفير عمالة ذات كفاءة عالية تتوافق مع احتياجات صاحب العمل، وترسيخ ثقافة احترام حقوق العامل وصاحب العمل وفقاً للمصلحة المشتركة ومبادئ حقوق الإنسان، مع المساهمة في تنظيم النشاط والارتقاء به وتقديم
+                أفضل صورة عن الكويت في الخارج </p>
 
-    <div class="container mb-5">
-        <div class="row px-3">
-            <form id="customerForm" method="POST">
-                <div class="mb-4">
-                    <label for="name" class="fw-bold mb-2">الاسم</label>
-                    <input type="text" name="name" id="name" class="form-control" required>
-                </div>
+            <h1 class="fw-bold"> الرؤية </h1>
+            <span style="width: 200px;"><hr style="background-color: #691E7C; height: 3px;"></span>
+            <p> أن تكون شركة الدرة لاستقدام وتشغيل العمالة المنزلية هي الشركة الرائدة في دولة الكويت في مجال عملها، وأن نكون خياركم الأول في رحلة البحث عن العمالة المناسبة والماهرة </p>
 
-                <div class="mb-4">
-                    <label for="phone" class="fw-bold mb-2">رقم الهاتف</label>
-                    <input type="tel" name="phone" id="phone" class="form-control" required>
-                </div>
-
-                <div class="mb-4">
-                    <label for="email" class="fw-bold mb-2">البريد الإلكتروني</label>
-                    <input type="email" name="email" id="email" class="form-control" required>
-                </div>
-
-                <div class="mb-4">
-                    <label for="address" class="fw-bold mb-2">العنوان</label>
-                    <input type="text" name="address" id="address" class="form-control" required>
-                </div>
-
-                <button type="submit" name="save_customer" class="btn btn-primary" onclick="navigate('payment')">التالي</button>
-            </form>
         </div>
     </div>
-</div>
 
-<!-- صفحة الدفع -->
-<div id="payment" class="page">
-    <div class="mt-5 me-3">
-        <h5 class="fw-bold">الدفع</h5>
-        <hr style="background-color: #e7b604;height: 3px;width:150px">
+    <div class="gols pb-5">
+        <div class="overl" style="padding: 50px 50px 0 50px;">
+            <h1 class="fw-bold text-white"> الأهداف </h1>
+            <span style="width: 200px;"><hr style="background-color: #e7b604; height: 3px;"></span>
+            <ul class="list-style-arrow last-rtl text-white">
+                <li class="text-white">توفير عمالة منزلية مدربة.</li>
+                <li class="text-white">كسر الممارسات الاحتكارية والمبالغة في رسوم الاستقدام.</li>
+                <li class="text-white">تصويب مسار سوق استقدام وتشغيل العمالة المنزلية وإعادة الثقة إليه.</li>
+                <li class="text-white">تذليل عقبات وإجراءات الاستقدام وتحقيق سرعة العمل والإنجاز.</li>
+                <li class="text-white">خلق علاقات إنسانية سليمة بين رب العمل والعامل وضمان رضا كافة الأطراف.</li>
+                <li class="text-white">توفير قاعدة بيانات إلكترونية تشمل الأيدي العاملة المتاحة والتي تم استقدامها ومصادر تصدير العمالة.</li>
+                <li class="text-white">تحسين صورة الكويت في المنظمات الدولية ذات العلاقة بهذا المجال.</li>
+                <li class="text-white">بناء علاقات متينة مع الدول المصدرة للعمالة</li>
+            </ul>
+
+            <h1 class="fw-bold text-white mt-5">           قيمنا  </h1>
+            <span style="width: 200px;"><hr style="background-color: #e7b604; height: 3px;"></span>
+            <ul class="list-style-arrow last-rtl">       
+                <li class="text-white">التعامل بصدق وعدالة وشفافية مع عملائنا وعمالتنا.</li>
+                <li class="text-white">عدم استغلال حاجة رب العمل والسوق لتحقيق أرباح غير عادلة.</li>
+                <li class="text-white">الحفاظ على هويتنا وعاداتنا الأصيلة.</li>
+                <li class="text-white">الاستفادة من أحدث التكنولوجيات في إدارة العمل.</li>
+            </ul>
+        </div>
+
     </div>
 
-    <div class="container mb-5">
-        <div class="row px-3">
-            <div class="alert alert-success">
-                ✅ تم تسجيل بيانات الموعد والعميل بنجاح!<br>
-                يمكنك الآن إجراء الدفع.
-            </div>
-            <button onclick="navigate('home')" class="btn btn-primary">العودة للرئيسية</button>
+    <!-- footer -->
+    <div style="background-color: #691E7C;">
+        <div class="overl py-3">
+            <h6 class="text-center text-white">2024 Al-Durra-  All rights reserved</h6>
         </div>
     </div>
-</div>
 
-<!-- صفحة تسجيل دخول الإدمن -->
-<div id="admin_login" class="page">
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-center">🔐 لوحة الإدمن</h3>
-                        <?php if ($admin_error): ?>
-                            <div class="alert alert-danger"><?php echo $admin_error; ?></div>
-                        <?php endif; ?>
-                        <form method="POST">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">اسم المستخدم</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">كلمة المرور</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <button type="submit" name="admin_login" class="btn btn-primary w-100">دخول</button>
-                        </form>
-                        <hr>
-                        <p class="text-center text-muted">بيانات الاختبار: admin / admin123</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- لوحة الإدمن -->
-<?php if (isset($_SESSION['admin_logged_in'])): ?>
-<div id="admin" class="page">
-    <div class="container-fluid mt-5">
-        <div class="row">
-            <div class="col-md-2" style="background: linear-gradient(135deg, #691E7C 0%, #8B3A9C 100%); color: white; min-height: 100vh;">
-                <h4 class="p-3">الدرة</h4>
-                <a onclick="navigate('admin')" class="d-block p-2 text-white text-decoration-none" style="cursor: pointer;">📊 الرئيسية</a>
-                <a onclick="navigate('admin_appointments')" class="d-block p-2 text-white text-decoration-none" style="cursor: pointer;">📅 المواعيد</a>
-                <a onclick="navigate('admin_users')" class="d-block p-2 text-white text-decoration-none" style="cursor: pointer;">👥 المستخدمون</a>
-                <a onclick="navigate('admin_payments')" class="d-block p-2 text-white text-decoration-none" style="cursor: pointer;">💳 الدفعات</a>
-                <hr style="border-color: rgba(255, 255, 255, 0.2);">
-                <form method="POST" style="display: inline;">
-                    <button type="submit" name="logout" class="btn btn-danger w-100">🚪 تسجيل الخروج</button>
-                </form>
-            </div>
-            <div class="col-md-10 p-4">
-                <h2>🏠 لوحة التحكم</h2>
-                <p>مرحباً، <?php echo htmlspecialchars($_SESSION['admin_username']); ?></p>
-                <div class="alert alert-success">✅ لوحة الإدمن تعمل بنجاح!</div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">0</h5>
-                                <p class="card-text">الطلبات</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">0</h5>
-                                <p class="card-text">المستخدمون</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">0</h5>
-                                <p class="card-text">المواعيد</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">0</h5>
-                                <p class="card-text">الدفعات</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<script>
-function navigate(page) {
-    // إخفاء جميع الصفحات
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.classList.remove('active'));
-    
-    // إظهار الصفحة المطلوبة
-    const targetPage = document.getElementById(page);
-    if (targetPage) {
-        targetPage.classList.add('active');
-    }
-    
-    // تحديث الـ URL
-    window.location.hash = page;
-    
-    // إخفاء الـ nav في صفحة تسجيل دخول الإدمن
-    const navContainer = document.getElementById('nav-container');
-    if (page === 'admin_login') {
-        navContainer.style.display = 'none';
-    } else {
-        navContainer.style.display = 'block';
-    }
-}
-
-// التعامل مع الـ hash عند تحميل الصفحة
-window.addEventListener('hashchange', function() {
-    const page = window.location.hash.slice(1) || 'home';
-    navigate(page);
-});
-
-// تحميل الصفحة الأولى عند فتح الموقع
-window.addEventListener('load', function() {
-    const page = window.location.hash.slice(1) || 'home';
-    navigate(page);
-});
-</script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 </body>
+
 </html>

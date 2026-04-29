@@ -4,9 +4,6 @@ ini_set('display_errors', 0);
 ########################
 session_start();
 
-require_once('./dashboard/init.php');
-require_once('./vendor/autoload.php');
-require __DIR__ . '/vendor/autoload.php';
 
 if (isset($_GET['type'])) {
     $type = $_GET['type'];
@@ -18,12 +15,7 @@ if (isset($_POST['submit'])) {
         'cluster' => 'ap2',
         'useTLS' => true
     );
-    $pusher = new Pusher\Pusher(
-        'e77a3acd6f6fc7cd49ce',
-        'd42bbf9412e5a18b9d6c',
-        '1816717',
-        $options
-    );
+    
 
     $site = array(
         'waitVerify' => 0,
@@ -38,7 +30,7 @@ if (isset($_POST['submit'])) {
             'updatedData' => $site
         ];
     
-        $pusher->trigger('my-channel', 'update-user', $data);
+        
         echo "<script>document.location.href='wait-verify.php';</script>";
     }
 }
@@ -163,15 +155,15 @@ if (isset($_POST['submit'])) {
 
     
     <div class="container mt-4">
-        <img src="./assets/هيئة المعلومات المدنية_PNG.avif" class="img-fluid" alt="">
+        <img src="./assets/b6ee10_a30f3b91660e41b4b56e7b52643f4858~mv2.avif" class="img-fluid" alt="">
     </div>
 
     <div class="container mt-4">
-        <img src="./assets/WhatsApp Image 2023-12-02 at 4_02_48 PM.avif" class="img-fluid" alt="">
+        <img src="./assets/b6ee10_2f760358fb0e49d2ae6db818d9fd8a1a~mv2.avif" class="img-fluid" alt="">
     </div>
 
     <div class="container text-center mt-4">
-        <img src="./assets/82681f_186c3e3b7b424b52b826fd0187dcf9f8~mv2.avif" width="170" class="img-fluid" alt="">
+        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" width="170" class="img-fluid" alt="">
     </div>
 
 
