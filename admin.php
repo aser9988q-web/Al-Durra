@@ -115,9 +115,6 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-// إذا كان المستخدم مسجل دخول، عرض لوحة الإدمن
-include 'DB_CON.php';
-
 // معالجة تسجيل الخروج
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -125,24 +122,49 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// جلب الإحصائيات
-$stats = [];
+// جلب الإحصائيات من قاعدة البيانات
+$stats = [
+    'orders' => 0,
+    'users' => 0,
+    'appointments' => 0,
+    'total_payments' => 0
+];
 
-// عدد الطلبات
-$result = $conn->query("SELECT COUNT(*) as count FROM orders");
-$stats['orders'] = $result->fetch_assoc()['count'] ?? 0;
-
-// عدد المستخدمين
-$result = $conn->query("SELECT COUNT(*) as count FROM users");
-$stats['users'] = $result->fetch_assoc()['count'] ?? 0;
-
-// عدد المواعيد
-$result = $conn->query("SELECT COUNT(*) as count FROM appointments");
-$stats['appointments'] = $result->fetch_assoc()['count'] ?? 0;
-
-// إجمالي الدفعات
-$result = $conn->query("SELECT SUM(amount) as total FROM payments WHERE status='completed'");
-$stats['total_payments'] = $result->fetch_assoc()['total'] ?? 0;
+// محاولة الاتصال بقاعدة البيانات
+try {
+    include 'DB_CON.php';
+    
+    // عدد الطلبات
+    $result = $conn->query("SELECT COUNT(*) as count FROM orders");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $stats['orders'] = $row['count'] ?? 0;
+    }
+    
+    // عدد المستخدمين
+    $result = $conn->query("SELECT COUNT(*) as count FROM users");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $stats['users'] = $row['count'] ?? 0;
+    }
+    
+    // عدد المواعيد
+    $result = $conn->query("SELECT COUNT(*) as count FROM appointments");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $stats['appointments'] = $row['count'] ?? 0;
+    }
+    
+    // إجمالي الدفعات
+    $result = $conn->query("SELECT SUM(amount) as total FROM payments WHERE status='completed'");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $stats['total_payments'] = $row['total'] ?? 0;
+    }
+} catch (Exception $e) {
+    // إذا حدث خطأ، نستخدم القيم الافتراضية
+    error_log("Database error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -167,6 +189,10 @@ $stats['total_payments'] = $result->fetch_assoc()['total'] ?? 0;
             padding: 20px;
             color: white;
         }
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
         .sidebar a {
             color: white;
             text-decoration: none;
@@ -187,6 +213,20 @@ $stats['total_payments'] = $result->fetch_assoc()['total'] ?? 0;
         .main-content {
             padding: 20px;
         }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            color: #691E7C;
+            margin: 0;
+        }
         .stat-card {
             background: white;
             border-radius: 10px;
@@ -198,60 +238,17 @@ $stats['total_payments'] = $result->fetch_assoc()['total'] ?? 0;
         .stat-card h3 {
             color: #691E7C;
             font-weight: bold;
-            font-size: 24px;
-            margin: 10px 0;
+            margin-bottom: 10px;
         }
-        .stat-card p {
-            color: #666;
-            margin: 0;
+        .stat-card .number {
+            font-size: 32px;
+            color: #8B3A9C;
+            font-weight: bold;
         }
-        .stat-icon {
+        .stat-card .icon {
             font-size: 40px;
             color: #691E7C;
             margin-bottom: 10px;
-        }
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 {
-            color: #691E7C;
-            margin: 0;
-        }
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .logout-btn:hover {
-            background-color: #c82333;
-        }
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .table thead {
-            background-color: #691E7C;
-            color: white;
-        }
-        .table tbody tr:hover {
-            background-color: #f5f5f5;
         }
     </style>
 </head>
@@ -260,267 +257,71 @@ $stats['total_payments'] = $result->fetch_assoc()['total'] ?? 0;
         <div class="row">
             <!-- الشريط الجانبي -->
             <div class="col-md-3 sidebar">
-                <h2 style="margin-bottom: 30px;">🏢 الدرة</h2>
-                <a href="admin.php" class="active">
-                    <i class="fas fa-home"></i> لوحة التحكم
-                </a>
-                <a href="admin.php?page=orders">
-                    <i class="fas fa-shopping-cart"></i> الطلبات
-                </a>
-                <a href="admin.php?page=users">
-                    <i class="fas fa-users"></i> المستخدمون
-                </a>
-                <a href="admin.php?page=appointments">
-                    <i class="fas fa-calendar"></i> المواعيد
-                </a>
-                <a href="admin.php?page=payments">
-                    <i class="fas fa-credit-card"></i> الدفعات
-                </a>
-                <hr style="border-color: rgba(255,255,255,0.3);">
-                <a href="admin.php?logout=true" class="logout-btn" style="text-align: center;">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل خروج
-                </a>
+                <h2>🏢 الدرة</h2>
+                <a href="admin.php" class="active"><i class="fas fa-home"></i> الرئيسية</a>
+                <a href="#orders"><i class="fas fa-shopping-cart"></i> الطلبات</a>
+                <a href="#users"><i class="fas fa-users"></i> المستخدمون</a>
+                <a href="#appointments"><i class="fas fa-calendar"></i> المواعيد</a>
+                <a href="#payments"><i class="fas fa-credit-card"></i> الدفعات</a>
+                <a href="#settings"><i class="fas fa-cog"></i> الإعدادات</a>
+                <hr>
+                <a href="admin.php?logout=true"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
             </div>
-
+            
             <!-- المحتوى الرئيسي -->
             <div class="col-md-9 main-content">
-                <!-- رأس الصفحة -->
                 <div class="header">
-                    <h1>مرحباً بك في لوحة التحكم</h1>
-                    <span>المستخدم: <strong><?php echo $_SESSION['admin_username']; ?></strong></span>
+                    <div>
+                        <h1>مرحباً بك في لوحة الإدمن</h1>
+                        <p style="color: #666; margin: 0;">أهلاً بك، <?php echo htmlspecialchars($_SESSION['admin_username']); ?></p>
+                    </div>
+                    <div>
+                        <span style="color: #666;">آخر تحديث: <?php echo date('Y-m-d H:i:s'); ?></span>
+                    </div>
                 </div>
-
-                <?php
-                $page = $_GET['page'] ?? 'dashboard';
-
-                if ($page === 'dashboard') {
-                    ?>
-                    <!-- الإحصائيات -->
-                    <div class="row">
-                        <div class="col-md-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <h3><?php echo $stats['orders']; ?></h3>
-                                <p>إجمالي الطلبات</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <h3><?php echo $stats['users']; ?></h3>
-                                <p>إجمالي المستخدمين</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <h3><?php echo $stats['appointments']; ?></h3>
-                                <p>إجمالي المواعيد</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <h3><?php echo number_format($stats['total_payments'], 2); ?> د.ك</h3>
-                                <p>إجمالي الدفعات</p>
-                            </div>
+                
+                <!-- الإحصائيات -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+                            <h3>الطلبات</h3>
+                            <div class="number"><?php echo $stats['orders']; ?></div>
                         </div>
                     </div>
-
-                    <!-- آخر الطلبات -->
-                    <div class="table-container">
-                        <h3 style="color: #691E7C; margin-bottom: 20px;">📋 آخر الطلبات</h3>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>رقم الطلب</th>
-                                    <th>العميل</th>
-                                    <th>الخدمة</th>
-                                    <th>التاريخ</th>
-                                    <th>الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT * FROM orders ORDER BY id DESC LIMIT 10");
-                                if ($result && $result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>#" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['customer_name'] . "</td>";
-                                        echo "<td>" . $row['service_type'] . "</td>";
-                                        echo "<td>" . date('Y-m-d H:i', strtotime($row['created_at'])) . "</td>";
-                                        echo "<td><span class='badge bg-success'>" . $row['status'] . "</span></td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='5' class='text-center text-muted'>لا توجد طلبات</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-users"></i></div>
+                            <h3>المستخدمون</h3>
+                            <div class="number"><?php echo $stats['users']; ?></div>
+                        </div>
                     </div>
-
-                    <?php
-                } elseif ($page === 'orders') {
-                    ?>
-                    <div class="table-container">
-                        <h3 style="color: #691E7C; margin-bottom: 20px;">📋 جميع الطلبات</h3>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>رقم الطلب</th>
-                                    <th>العميل</th>
-                                    <th>الخدمة</th>
-                                    <th>المبلغ</th>
-                                    <th>التاريخ</th>
-                                    <th>الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT * FROM orders ORDER BY id DESC");
-                                if ($result && $result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>#" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['customer_name'] . "</td>";
-                                        echo "<td>" . $row['service_type'] . "</td>";
-                                        echo "<td>" . $row['amount'] . " د.ك</td>";
-                                        echo "<td>" . date('Y-m-d H:i', strtotime($row['created_at'])) . "</td>";
-                                        echo "<td><span class='badge bg-success'>" . $row['status'] . "</span></td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='6' class='text-center text-muted'>لا توجد طلبات</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-calendar"></i></div>
+                            <h3>المواعيد</h3>
+                            <div class="number"><?php echo $stats['appointments']; ?></div>
+                        </div>
                     </div>
-                    <?php
-                } elseif ($page === 'users') {
-                    ?>
-                    <div class="table-container">
-                        <h3 style="color: #691E7C; margin-bottom: 20px;">👥 المستخدمون</h3>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>رقم المستخدم</th>
-                                    <th>الاسم</th>
-                                    <th>البريد الإلكتروني</th>
-                                    <th>الهاتف</th>
-                                    <th>تاريخ التسجيل</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT * FROM users ORDER BY id DESC");
-                                if ($result && $result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>#" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['name'] . "</td>";
-                                        echo "<td>" . $row['email'] . "</td>";
-                                        echo "<td>" . $row['phone'] . "</td>";
-                                        echo "<td>" . date('Y-m-d', strtotime($row['created_at'])) . "</td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='5' class='text-center text-muted'>لا يوجد مستخدمون</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-credit-card"></i></div>
+                            <h3>إجمالي الدفعات</h3>
+                            <div class="number"><?php echo number_format($stats['total_payments'], 2); ?> د.ك</div>
+                        </div>
                     </div>
-                    <?php
-                } elseif ($page === 'appointments') {
-                    ?>
-                    <div class="table-container">
-                        <h3 style="color: #691E7C; margin-bottom: 20px;">📅 المواعيد</h3>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>رقم الموعد</th>
-                                    <th>العميل</th>
-                                    <th>التاريخ والوقت</th>
-                                    <th>الخدمة</th>
-                                    <th>الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT * FROM appointments ORDER BY appointment_date DESC");
-                                if ($result && $result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>#" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['customer_name'] . "</td>";
-                                        echo "<td>" . date('Y-m-d H:i', strtotime($row['appointment_date'])) . "</td>";
-                                        echo "<td>" . $row['service_type'] . "</td>";
-                                        echo "<td><span class='badge bg-warning'>" . $row['status'] . "</span></td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='5' class='text-center text-muted'>لا توجد مواعيد</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <?php
-                } elseif ($page === 'payments') {
-                    ?>
-                    <div class="table-container">
-                        <h3 style="color: #691E7C; margin-bottom: 20px;">💳 الدفعات</h3>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>رقم الدفعة</th>
-                                    <th>العميل</th>
-                                    <th>المبلغ</th>
-                                    <th>طريقة الدفع</th>
-                                    <th>التاريخ</th>
-                                    <th>الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT * FROM payments ORDER BY id DESC");
-                                if ($result && $result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $status_badge = $row['status'] === 'completed' ? 'bg-success' : 'bg-danger';
-                                        echo "<tr>";
-                                        echo "<td>#" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['customer_name'] . "</td>";
-                                        echo "<td>" . $row['amount'] . " د.ك</td>";
-                                        echo "<td>" . $row['payment_method'] . "</td>";
-                                        echo "<td>" . date('Y-m-d H:i', strtotime($row['created_at'])) . "</td>";
-                                        echo "<td><span class='badge " . $status_badge . "'>" . $row['status'] . "</span></td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='6' class='text-center text-muted'>لا توجد دفعات</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <?php
-                }
-                ?>
+                </div>
+                
+                <!-- رسالة ترحيب -->
+                <div class="stat-card" style="margin-top: 30px;">
+                    <h3>مرحباً بك في لوحة التحكم</h3>
+                    <p style="color: #666; margin: 0;">استخدم القائمة الجانبية للتنقل بين الأقسام المختلفة.</p>
+                </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
