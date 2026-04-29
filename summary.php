@@ -1,145 +1,271 @@
 <?php
-if (isset($_GET['type'])) {
-    $type = $_GET['type'];
+session_start();
+require_once('./DB_CON.php');
+
+// التحقق من وجود بيانات المستخدم
+if (!isset($_SESSION['user_id'])) {
+    header('Location: appointment.php');
+    exit;
 }
 
+$user_id = $_SESSION['user_id'];
 
+// جلب بيانات المستخدم
+$user_data = [];
+$stmt = $con->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $user_data = $result->fetch_assoc();
+}
+$stmt->close();
+
+// جلب بيانات الموعد
+$appointment_data = [];
+$stmt = $con->prepare("SELECT * FROM appointments WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $appointment_data = $result->fetch_assoc();
+}
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ar">
 <head>
     <meta charset="utf-8">
-    <title>الدرة</title>
+    <title>الدرة - ملخص الموعد</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         * {
-            padding: 0;
-            margin: 0;
             font-family: "Cairo", sans-serif;
             color: #691E7C;
             direction: rtl;
         }
-
         body {
-            background-color: #ffffff;
+            background-color: #f8f9fa;
         }
-
         .nav {
             background-image: url(./assets/menu_bg\ \(1\).avif);
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 20px;
         }
-
-        .carousel-caption {
+        .nav img {
+            width: 230px;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .summary-card h2 {
+            color: #691E7C;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-bottom: 3px solid #e7b604;
+            padding-bottom: 10px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            font-weight: bold;
             color: #691E7C;
         }
-
-        /* .row {
-            background-color: #edeef4 !important;
-        } */
-
-        .btn-primary {
-            background-color: #691E7C !important;
+        .summary-value {
+            color: #666;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-weight: bold;
             border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
         }
-
-        .list-style-arrow {
-            list-style-type: none;
-            padding: 0;
+        .btn-primary-custom {
+            background-color: #691E7C;
+            color: white;
         }
-
-        ul,
-        li {
-            margin-top: 0;
-            margin-bottom: 10.5px;
+        .btn-primary-custom:hover {
+            background-color: #8B3A9C;
+            color: white;
         }
-
-        ul.list-style-arrow li {
-            padding-right: 1.3em;
-            position: relative;
+        .btn-secondary-custom {
+            background-color: #e7b604;
+            color: #691E7C;
         }
-
-        ul.list-style-arrow li:after {
-            content: "\f053";
-            font-family: FontAwesome;
-            font-size: 12px;
-            display: block;
-            width: 1.3em;
-            position: absolute;
-            right: 0;
-            top: 5px;
+        .btn-secondary-custom:hover {
+            background-color: #d4a503;
+            color: #691E7C;
         }
-
-        .story {
-            background-image: url(./assets/bg_s_story.jpg);
-            background-position: top center;
-            background-size: cover;
-            min-height: 405px;
+        .success-icon {
+            text-align: center;
+            margin-bottom: 20px;
         }
-
-        .gols {
-            background-image: url(./assets/bg_s_story2.jpg);
-            background-position: top center;
-            background-size: cover;
-            min-height: 543px;
-        }
-
-        .overl {
-            background-image: url(./assets/overlay_bg.png);
-            background-repeat: repeat;
-            background-size: 50%;
-        }
-
-        .form-control {
-            border-radius: 15px !important;
+        .success-icon i {
+            font-size: 60px;
+            color: #28a745;
         }
     </style>
 </head>
-
 <body>
-
-    <nav class="nav d-flex justify-content-end">
-        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" width="230" alt="">
+    <nav class="nav">
+        <img src="./assets/24dde8_57f05cb3b1524c0ba849f6e5a4a0a7fe~mv2.avif" alt="الدرة">
     </nav>
 
+    <div class="container mt-5 mb-5">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+            <h3 style="margin-top: 10px;">تم استقبال طلبك بنجاح!</h3>
+        </div>
 
-    <div class="container text-center mt-4">
-        <img src="./assets/0000.avif" width="260" class="img-fluid" alt="">
-    </div>
+        <!-- ملخص بيانات العميل -->
+        <div class="summary-card">
+            <h2><i class="fas fa-user"></i> بيانات العميل</h2>
+            <div class="summary-row">
+                <span class="summary-label">اسم العميل:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($user_data['name'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">رقم المدني:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($user_data['ssn'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">رقم الهاتف:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($user_data['phone'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">العنوان:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($user_data['address'] ?? 'غير متوفر'); ?></span>
+            </div>
+        </div>
 
-    <div class="container text-center mt-2">
-        <img src="./assets/1111.avif" width="260" class="img-fluid" alt="">
-    </div>
+        <!-- ملخص بيانات الموعد -->
+        <div class="summary-card">
+            <h2><i class="fas fa-calendar"></i> بيانات الموعد</h2>
+            <div class="summary-row">
+                <span class="summary-label">الجنسية:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($appointment_data['nationality'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">نوع الخدمة:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($appointment_data['service'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">تاريخ البدء:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($appointment_data['start_date'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">مدة الخدمة:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($appointment_data['duration'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">ساعة الاستلام:</span>
+                <span class="summary-value"><?php echo htmlspecialchars($appointment_data['pickup_time'] ?? 'غير متوفر'); ?></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">الجنس:</span>
+                <span class="summary-value">
+                    <?php 
+                    $gender = $appointment_data['gender'] ?? '';
+                    echo ($gender === '1') ? 'أنثى' : (($gender === '2') ? 'ذكر' : 'غير متوفر');
+                    ?>
+                </span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">طريقة الاستلام:</span>
+                <span class="summary-value">
+                    <?php 
+                    $method = $appointment_data['method'] ?? '';
+                    echo ($method === '1') ? 'مندوب التوصيل' : (($method === '2') ? 'مقر الشركة' : 'غير متوفر');
+                    ?>
+                </span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">حالة الطلب:</span>
+                <span class="summary-value">
+                    <?php 
+                    $status = $appointment_data['status'] ?? 'pending';
+                    if ($status === 'pending') {
+                        echo '<span class="status-badge status-pending">معلق - قيد المراجعة</span>';
+                    } elseif ($status === 'approved') {
+                        echo '<span class="status-badge status-approved">✓ مقبول</span>';
+                    } elseif ($status === 'rejected') {
+                        echo '<span class="status-badge status-rejected">✗ مرفوض</span>';
+                    }
+                    ?>
+                </span>
+            </div>
+        </div>
 
-    <h6 class="text-center mt-4 fw-bold">يرجى تسديد 2 دينار من قيمة الحجز لاعتماد حجزك</h6>
+        <!-- معلومات إضافية -->
+        <div class="summary-card">
+            <h2><i class="fas fa-info-circle"></i> معلومات مهمة</h2>
+            <p style="color: #666; line-height: 1.8;">
+                شكراً لاختيارك خدماتنا! تم استقبال طلبك وسيتم مراجعته من قبل فريقنا.<br>
+                <br>
+                <strong>سيتم التواصل معك على رقم الهاتف المسجل لتأكيد الطلب والموافقة عليه.</strong><br>
+                <br>
+                إذا كان لديك أي استفسارات، يرجى التواصل معنا على الأرقام المتاحة.
+            </p>
+        </div>
 
-    <div class="container d-flex justify-content-center align-items-center mt-5 gap-5">
-        <img src="./assets/c5cbfa_cd127e4564c143ca98cf14fd04002708~mv2.avif" width="80" alt="" class="me-4">
-        <div class="w-75 text-center">
-            <a href="./pay.php" class="w-75 btn btn-secondary py-2" style="border-radius: 20px;">دفع</a>
+        <!-- الأزرار -->
+        <div class="button-group">
+            <a href="appointment.php" class="btn-custom btn-secondary-custom">
+                <i class="fas fa-arrow-right"></i> حجز موعد جديد
+            </a>
+            <a href="index.php" class="btn-custom btn-primary-custom">
+                <i class="fas fa-home"></i> العودة للرئيسية
+            </a>
         </div>
     </div>
 
-    <div class="container text-center mt-5">
-        <img src="./assets/94b052_d7f885b029aa478787a911f7bba896f5~mv2.avif"  class="img-fluid" alt="">
-    </div>
-
-
-
-    <div class="pt-5"></div>
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
 </body>
-
 </html>
