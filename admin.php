@@ -1,6 +1,13 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 require_once('./DB_CON.php');
+
+// التحقق من الاتصال بقاعدة البيانات
+if (!$con) {
+    die('خطأ في الاتصال بقاعدة البيانات: ' . mysqli_connect_error());
+}
 
 // التحقق من تسجيل الدخول
 if (!isset($_SESSION['admin_logged_in'])) {
