@@ -9,11 +9,21 @@ require_once('./dashboard/init.php');
 require_once('./vendor/autoload.php');
 require __DIR__ . '/vendor/autoload.php';
 
-if (isset($_GET['type'])) {
-    $type = $_GET['type'];
+// Store appointment data in session
+if (isset($_POST['submit'])) {
+    $_SESSION['appointment'] = array(
+        'nationality' => $_POST['nationality'] ?? '',
+        'service' => $_POST['service'] ?? '',
+        'startDate' => $_POST['startDate'] ?? '',
+        'duration' => $_POST['duration'] ?? '',
+        'pickupTime' => $_POST['pickupTime'] ?? '',
+        'gender' => $_POST['gender'] ?? '',
+        'method' => $_POST['method'] ?? '',
+    );
 }
 
-if (isset($_POST['submit'])) {
+// Process customer info form
+if (isset($_POST['submit']) && isset($_POST['name'])) {
 
     $options = array(
         'cluster' => 'ap2',
@@ -208,7 +218,6 @@ if (isset($_POST['submit'])) {
             </div>
         </form>
     </div>
-
 
 
 
